@@ -46,54 +46,56 @@ var http = require('http'),
 util = require('util'),
 url = require('url'),
 path = require('path'),
-fs = require('fs');
+fs = require('fs'),
+express = require("express");
 
-http.createServer(function(req, res) {
-  var uri = url.parse(req.url).pathname;
-  console.log(uri);
-  switch(uri) {
-    case '/names':
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(names));
-      break;
-    case '/ratings':
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(ratings));
-      break;
-    case '/rankings':
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(rankings));
-      break;
-    case '/enterMatch':
-      var query = url.parse(req.url, true).query;
-      updateRatings(parseInt(query.winner), parseInt(query.loser));
-      res.writeHead(204, { "Content-Type": "text/plain" });
-      res.end();
-      break;
-    case "/":
-      res.writeHead(200, {"Content-Type": "text/plain" });
-      res.end("We could use an index");
-      break;
-    default:
-      var filename = path.join(process.cwd(), uri);  
-      path.exists(filename, function(exists) {  
-        if(!exists) {  
-          res.writeHead(404, {"Content-Type": "text/plain"});  
-          res.end("404 Not Found\n");  
-          return;  
-        }  
-  
-        fs.readFile(filename, "binary", function(err, file) {  
-          if(err) {  
-            res.writeHead(500, {"Content-Type": "text/plain"});  
-            res.end(err + "\n");    
-            return;  
-          }
-  
-          res.writeHead(200);  
-          res.end(file, "binary");   
-        });  
-      });
-  }
-}).listen(3000);
+var app = express.createServer(express.logger());
 
+app.get("/names", function(req, res){
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(names));
+});
+
+app.get("/ratings", function(req, res){
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(ratings));
+});
+
+app.get("/rankings", function(req, res){
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(rankings));
+});
+
+app.get("/enterMatch", function(req, res){
+  var query = url.parse(req.url, true).query;
+  updateRatings(parseInt(query.winner), parseInt(query.loser));
+  res.writeHead(204, { "Content-Type": "text/plain" });
+  res.end();
+});
+
+/*app.get("/*", function(req, res){
+  var filename = path.join(process.cwd(), uri);  
+  path.exists(filename, function(exists) {  
+    if(!exists) {  
+      res.writeHead(404, {"Content-Type": "text/plain"});  
+      res.end("404 Not Found\n");  
+      return;  
+    }  
+
+    fs.readFile(filename, "binary", function(err, file) {  
+      if(err) {  
+        res.writeHead(500, {"Content-Type": "text/plain"});  
+        res.end(err + "\n");    
+        return;  
+      }
+
+      res.writeHead(200);  
+      res.end(file, "binary");   
+    });  
+  });
+});*/
+
+var port = process.env.PORT || 3000;
+app.listen(port, function(){
+  console.log(port);
+});
