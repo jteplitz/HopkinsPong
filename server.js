@@ -74,9 +74,10 @@ app.get("/enterMatch", function(req, res){
   res.end();
 });
 
-app.post("/u/:email", function(req, res){
-  pg.connect(process.env.DATABASE_URL, function(err, client){
-    var query = client.query("CREATE TABLE  `pong`.`users` (" +
+app.get("/u/:email", function(req, res){
+  res.end(process.env.DATABASE_URL);
+/*  pg.connect(process.env.DATABASE_URL, function(err, client){
+    var query = client.query("CREATE TABLE test (" +
     "`id` INT NOT NULL AUTO_INCREMENT ," + 
     "`email` TEXT NOT NULL ," + 
     "`first_name` TEXT NOT NULL ," + 
@@ -85,7 +86,7 @@ app.post("/u/:email", function(req, res){
     "UNIQUE (" +
     "`id`"
     );
-  });
+  });*/
 });
 
 
