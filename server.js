@@ -47,6 +47,7 @@ util = require('util'),
 url = require('url'),
 path = require('path'),
 fs = require('fs'),
+pg = require("pg"),
 express = require("express");
 
 var app = express.createServer(express.logger());
@@ -72,6 +73,21 @@ app.get("/enterMatch", function(req, res){
   res.writeHead(204, { "Content-Type": "text/plain" });
   res.end();
 });
+
+app.post("/u/:email", function(req, res){
+  pg.connect(process.env.DATABASE_URL, function(err, client){
+    var query = client.query("CREATE TABLE  `pong`.`users` (" +
+    "`id` INT NOT NULL AUTO_INCREMENT ," + 
+    "`email` TEXT NOT NULL ," + 
+    "`first_name` TEXT NOT NULL ," + 
+    "`last_name` TEXT NOT NULL ," +
+    "PRIMARY KEY (  `id` ) ," +
+    "UNIQUE (" +
+    "`id`"
+    );
+  });
+});
+
 
 /*app.get("/*", function(req, res){
   var filename = path.join(process.cwd(), uri);  
