@@ -47,8 +47,8 @@ util = require('util'),
 url = require('url'),
 path = require('path'),
 fs = require('fs'),
-pg = require("pg"),
-express = require("express");
+mongoose = require("mongoose"),
+express  = require("express");
 
 var app = express.createServer(express.logger());
 
@@ -74,20 +74,45 @@ app.get("/enterMatch", function(req, res){
   res.end();
 });
 
-app.get("/u/:email", function(req, res){
-  res.end(process.env.DATABASE_URL);
-/*  pg.connect(process.env.DATABASE_URL, function(err, client){
-    var query = client.query("CREATE TABLE test (" +
-    "`id` INT NOT NULL AUTO_INCREMENT ," + 
-    "`email` TEXT NOT NULL ," + 
-    "`first_name` TEXT NOT NULL ," + 
-    "`last_name` TEXT NOT NULL ," +
-    "PRIMARY KEY (  `id` ) ," +
-    "UNIQUE (" +
-    "`id`"
-    );
-  });*/
+// we should probbably create a schema.js file for these or something
+var Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
+var User = new Schema({
+  email     : {type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true }},
+  password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
+  firstName : String,
+  lastName  : String,
+  user_id   : ObjectId
 });
+  
+app.post("/u/:email", function(req, res){
+  mongoose.connect("mongodb://localhost/users");
+
+  User = mongoose.model("User", User);
+  var user = new User({
+    email:      req.params.email,
+    password:   req.params.password,
+    firstName:  req.params.first_name,
+    lastName:   req.params.last_name
+  });
+  user.save();
+  
+  res.end(JSON.stringify({error: 0, msg: "Successfully created user"})); // this is going to say it was a success even when it was not, we should probbably fix that.
+
+});
+
+app.get("/u/:email", function(req, res){
+  mongoose.connect("mongodb://localhost/users");
+  User = mongoose.model("User", User);
+  
+  User.find({email: req.params.email}, function(err, user){
+    res.end(JSON.stringify(user));  //obviously we aren't just going to output the database object in the future but for now.
+  });
+});
+
+function validatePresenceOf(value){
+  return value && value.length;
+}
 
 
 /*app.get("/*", function(req, res){

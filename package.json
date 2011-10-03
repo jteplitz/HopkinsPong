@@ -3,6 +3,6 @@
   "version": "0.0.1",
   "dependencies": {
     "express": "2.2.0",
-    "pg": "0.5.4"
+    "mongoose": "2.2.3"
   }
 }
