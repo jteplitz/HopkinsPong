@@ -48,9 +48,11 @@ url = require('url'),
 path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
+hashlib  = require("hashlib"),
 express  = require("express");
 
 var app = express.createServer(express.logger());
+app.use(express.bodyParser());
 
 app.get("/names", function(req, res){
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -87,13 +89,14 @@ var User = new Schema({
   
 app.post("/u/:email", function(req, res){
   mongoose.connect("mongodb://localhost/users");
+  console.log(req.params, req.params.password);
 
   User = mongoose.model("User", User);
   var user = new User({
-    email:      req.params.email,
-    password:   req.params.password,
-    firstName:  req.params.first_name,
-    lastName:   req.params.last_name
+    email:      req.body.email,
+    password:   req.body.password,
+    firstName:  req.body.firstName,
+    lastName:   req.body.lastName
   });
   user.save();
   
@@ -102,16 +105,31 @@ app.post("/u/:email", function(req, res){
 });
 
 app.get("/u/:email", function(req, res){
+  console.log("getting account, " + req.header("Authentication"));
   mongoose.connect("mongodb://localhost/users");
   User = mongoose.model("User", User);
-  
+
   User.find({email: req.params.email}, function(err, user){
-    res.end(JSON.stringify(user));  //obviously we aren't just going to output the database object in the future but for now.
+    var user = user[0];
+    if (!authenticateReq(user.password, req.params.email, "/u/" + req.params.email, req.header("Authentication"))){
+        res.writeHead(401, {"Content-Type": "text/plain"});
+        res.end("You are not authorized to view this page");
+        return;
+    }
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    res.end(JSON.stringify(user));
   });
 });
 
 function validatePresenceOf(value){
   return value && value.length;
+}
+
+function authenticateReq(password, email, uri, hash){
+  console.log(password, email, uri);
+  var authHash = hashlib.sha256(password + email + uri);
+  console.log(authHash); 
+  return authHash == hash;
 }
 
 
