@@ -77,8 +77,6 @@ app.get("/enterMatch", function(req, res){
   res.end();
 });
 
-<<<<<<< HEAD
-=======
 // we should probbably create a schema.js file for these or something
 var Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
@@ -135,7 +133,29 @@ function authenticateReq(password, email, uri, hash){
   return authHash == hash;
 }
 
->>>>>>> users
+
+/*app.get("/*", function(req, res){
+  var filename = path.join(process.cwd(), uri);  
+  path.exists(filename, function(exists) {  
+    if(!exists) {  
+      res.writeHead(404, {"Content-Type": "text/plain"});  
+      res.end("404 Not Found\n");  
+      return;  
+    }  
+
+    fs.readFile(filename, "binary", function(err, file) {  
+      if(err) {  
+        res.writeHead(500, {"Content-Type": "text/plain"});  
+        res.end(err + "\n");    
+        return;  
+      }
+
+      res.writeHead(200);  
+      res.end(file, "binary");   
+    });  
+  });
+});*/
+
 var port = process.env.PORT || 3000;
 app.listen(port, function(){
   console.log(port);
