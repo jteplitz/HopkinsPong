@@ -101,7 +101,6 @@ app.post("/u/:email", function(req, res){
   user.save();
   
   res.end(JSON.stringify({error: 0, msg: "Successfully created user"})); // this is going to say it was a success even when it was not, we should probbably fix that.
-
 });
 
 app.get("/u/:email", function(req, res){
