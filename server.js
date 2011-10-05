@@ -74,8 +74,6 @@ app.get("/enterMatch", function(req, res){
   res.end();
 });
 
-});
-
 
 /*app.get("/*", function(req, res){
   var filename = path.join(process.cwd(), uri);  
