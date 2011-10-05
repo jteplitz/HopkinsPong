@@ -47,10 +47,13 @@ util = require('util'),
 url = require('url'),
 path = require('path'),
 fs = require('fs'),
-pg = require("pg"),
-express = require("express");
+mongoose = require("mongoose"),
+hashlib  = require("hashlib"),
+config   = require("./config"),
+express  = require("express");
 
 var app = express.createServer(express.logger());
+app.use(express.bodyParser());
 
 app.get("/names", function(req, res){
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -74,29 +77,65 @@ app.get("/enterMatch", function(req, res){
   res.end();
 });
 
+<<<<<<< HEAD
+=======
+// we should probbably create a schema.js file for these or something
+var Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
+var User = new Schema({
+  email     : {type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true }},
+  password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
+  firstName : String,
+  lastName  : String,
+  user_id   : ObjectId
+});
+  
+app.post("/u/:email", function(req, res){
+  mongoose.connect(config.databaseURI);
+  console.log(req.params, req.params.password);
 
-/*app.get("/*", function(req, res){
-  var filename = path.join(process.cwd(), uri);  
-  path.exists(filename, function(exists) {  
-    if(!exists) {  
-      res.writeHead(404, {"Content-Type": "text/plain"});  
-      res.end("404 Not Found\n");  
-      return;  
-    }  
-
-    fs.readFile(filename, "binary", function(err, file) {  
-      if(err) {  
-        res.writeHead(500, {"Content-Type": "text/plain"});  
-        res.end(err + "\n");    
-        return;  
-      }
-
-      res.writeHead(200);  
-      res.end(file, "binary");   
-    });  
+  User = mongoose.model("User", User);
+  var user = new User({
+    email:      req.body.email,
+    password:   req.body.password,
+    firstName:  req.body.firstName,
+    lastName:   req.body.lastName
   });
-});*/
+  user.save();
+  
+  res.end(JSON.stringify({error: 0, msg: "Successfully created user"})); // this is going to say it was a success even when it was not, we should probbably fix that.
+});
 
+app.get("/u/:email", function(req, res){
+  console.log(config.databaseURI);
+  console.log("getting account, " + req.header("Authentication"));
+  mongoose.connect(config.databaseURI);
+  User = mongoose.model("User", User);
+
+  User.find({email: req.params.email}, function(err, user){
+    var user = user[0];
+    if (!authenticateReq(user.password, req.params.email, "/u/" + req.params.email, req.header("Authentication"))){
+        res.writeHead(401, {"Content-Type": "text/plain"});
+        res.end("You are not authorized to view this page");
+        return;
+    }
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    res.end(JSON.stringify(user));
+  });
+});
+
+function validatePresenceOf(value){
+  return value && value.length;
+}
+
+function authenticateReq(password, email, uri, hash){
+  console.log(password, email, uri);
+  var authHash = hashlib.sha256(password + email + uri);
+  console.log(authHash); 
+  return authHash == hash;
+}
+
+>>>>>>> users
 var port = process.env.PORT || 3000;
 app.listen(port, function(){
   console.log(port);
