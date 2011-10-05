@@ -49,6 +49,7 @@ path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
 hashlib  = require("hashlib"),
+config   = require("./config"),
 express  = require("express");
 
 var app = express.createServer(express.logger());
@@ -88,7 +89,7 @@ var User = new Schema({
 });
   
 app.post("/u/:email", function(req, res){
-  mongoose.connect("mongodb://localhost/users");
+  mongoose.connect(config.databaseURI);
   console.log(req.params, req.params.password);
 
   User = mongoose.model("User", User);
@@ -104,8 +105,9 @@ app.post("/u/:email", function(req, res){
 });
 
 app.get("/u/:email", function(req, res){
+  console.log(config.databaseURI);
   console.log("getting account, " + req.header("Authentication"));
-  mongoose.connect("mongodb://localhost/users");
+  mongoose.connect(config.databaseURI);
   User = mongoose.model("User", User);
 
   User.find({email: req.params.email}, function(err, user){
