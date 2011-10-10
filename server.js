@@ -1,18 +1,3 @@
-var names = ["Connor",
-  "Jason",
-  "Nate"];
-
-// elo ratings, start at 1000 
-var ratings = [];
-for(i = 0; i < names.length; i++)
-  ratings[i] = 1000.0;
-
-//rankings, start at 0
-//rankings[position] = player
-var rankings = [];
-for(i = 0; i < names.length; i++)
-  rankings[i] = i;
-  
 var K = 32; //K-value in Elo formula
 
 // Elo update function based on Wikipedia
@@ -125,13 +110,13 @@ app.get("/u/:email", function(req, res){
 
   User.find({email: req.params.email}, function(err, user){
     var user = user[0];
-    if (!authenticateReq(user.password, req.params.email, "/u/" + req.params.email, req.header("Authentication"))){
-        res.writeHead(401, {"Content-Type": "text/plain"});
-        res.end("You are not authorized to view this page");
-        return;
+    var output = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        rating: user.rating
     }
     res.writeHead(200, {"Content-Type": "text/plain"});
-    res.end(JSON.stringify(user));
+    res.end(JSON.stringify(output));
   });
 });
 
