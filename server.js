@@ -16,15 +16,18 @@ for(i = 0; i < names.length; i++)
 var K = 32; //K-value in Elo formula
 
 // Elo update function based on Wikipedia
-function updateRatings(winner, loser) {
-  var e = 1 / (1 + Math.pow(10, (ratings[winner] - ratings[loser]) / 400)); //expected value of the loser, winner is 1 - e
+function updateRatings(winnerRating, loserRating) {
+  var e = 1 / (1 + Math.pow(10, (winnerRating - loserRating) / 400)); //expected value of the loser, winner is 1 - e
   
   // Assuming A is the winner and B is the loser (from Wikipedia):
   // Ra' = Ra + K * (Sa - Ea) = Ra + K * (1 - Ea) = Ra + K * e
   // Rb' = Rb + K * (Sb - Eb) = Ra - K * Eb = Ra - K * e
-  ratings[winner] += K * e;
-  ratings[loser] -= K * e;
+  winnerRating += K * e;
+  loserRating -= K * e;
   
+  var ratings = [winnerRating, loserRating];
+  
+  /*
   //Update rankings
   winnerPos = rankings.indexOf(winner);
   while(winnerPos > 0 && ratings[rankings[winnerPos - 1]] < ratings[winner]) {
@@ -38,7 +41,9 @@ function updateRatings(winner, loser) {
     rankings[loserPos] = rankings[loserPos + 1];
     rankings[loserPos + 1] = loser;
     loserPos++;
-  }
+  } */
+  
+  return ratings;
 }
 
 
@@ -55,26 +60,33 @@ express  = require("express");
 var app = express.createServer(express.logger());
 app.use(express.bodyParser());
 
-app.get("/names", function(req, res){
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(names));
-});
-
-app.get("/ratings", function(req, res){
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(ratings));
-});
-
-app.get("/rankings", function(req, res){
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(rankings));
-});
-
-app.get("/enterMatch", function(req, res){
-  var query = url.parse(req.url, true).query;
-  updateRatings(parseInt(query.winner), parseInt(query.loser));
-  res.writeHead(204, { "Content-Type": "text/plain" });
-  res.end();
+app.post("/m", function(req, res){
+    console.log("adding match between " + req.body.winner + " and " + req.body.loser);
+    mongoose.connect(config.databaseURI);
+    User = mongoose.model("User", User);
+    User.find({email: req.body.winner}, function(err, winner) {
+        var winner = winner[0];
+        if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
+            res.writeHead(401, {"Content-Type": "text/plain"});
+            res.end("You are not authorized to view this page");
+            return;
+        }
+        User.find({email: req.body.loser}, function(err, loser) {
+            var loser = loser[0];
+            if (!authenticateReq(loser.password, req.body.loser, "/m", req.body.loserAuth)){
+                res.writeHead(401, {"Content-Type": "text/plain"});
+                res.end("You are not authorized to view this page");
+                return;
+            }
+            var ratings = updateRatings(winner.rating, loser.rating);
+            winner.rating = ratings[0];
+            loser.rating = ratings[1];
+            winner.save();
+            loser.save();
+            
+            res.end(JSON.stringify({error: 0, msg: "Successfully entered match"})); // this is going to say it was a success even when it was not, we should probbably fix that.
+        });
+    });
 });
 
 // we should probbably create a schema.js file for these or something
@@ -85,6 +97,7 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
+  rating    : {type: Number, default: 1000}, 
   user_id   : ObjectId
 });
   
@@ -135,7 +148,7 @@ function authenticateReq(password, email, uri, hash){
 
 
 /*app.get("/*", function(req, res){
-  var filename = path.join(process.cwd(), uri);  
+  var filename = path.join(process.cwd(), req.url);  
   path.exists(filename, function(exists) {  
     if(!exists) {  
       res.writeHead(404, {"Content-Type": "text/plain"});  
