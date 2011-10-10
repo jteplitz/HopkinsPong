@@ -131,8 +131,7 @@ function authenticateReq(password, email, uri, hash){
   return authHash == hash;
 }
 
-
-/*app.get("/*", function(req, res){
+app.get("/*", function(req, res){
   var filename = path.join(process.cwd(), req.url);  
   path.exists(filename, function(exists) {  
     if(!exists) {  
@@ -152,7 +151,7 @@ function authenticateReq(password, email, uri, hash){
       res.end(file, "binary");   
     });  
   });
-});*/
+});
 
 var port = process.env.PORT || 3000;
 app.listen(port, function(){
