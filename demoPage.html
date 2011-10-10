@@ -7,7 +7,7 @@
       $(document).ready(function(){
         $("#go").click(function(){
           console.log(SHA256($("#password").val()), $("#email").val(), "/u/" + $("#email").val());
-          $.ajax("http://hopkinspong.herokuapps.com/u/" + $("#email").val(), {
+          $.ajax("/u/" + $("#email").val(), {
             type: "GET",
             headers: {
               "Authentication": SHA256(SHA256($("#password").val()) + $("#email").val() + ("/u/" + $("#email").val()))
@@ -25,7 +25,22 @@
             firstName: $("#firstName").val(),
             lastName: $("#lastName").val()
           };
-          $.ajax("http://hopkinspong.herokuapps.com//u/" + email, {
+          $.ajax("/u/" + email, {
+            type: "POST",
+            data: params,
+            onSuccess: function(data){
+              console.log(data);
+            }
+          });
+        });
+        $("#enterMatch").click(function(){
+          var params = {
+            winner: $("#winner").val(),
+            winnerAuth: SHA256(SHA256($("#winnerAuth").val()) + $("#winner").val() + "/m"),
+            loser: $("#loser").val(),
+            loserAuth: SHA256(SHA256($("#loserAuth").val()) + $("#loser").val() + "/m")
+          };
+          $.ajax("/m", {
             type: "POST",
             data: params,
             onSuccess: function(data){
@@ -44,7 +59,13 @@
     <label for="firstName">First Name: </label><input type="text" id="firstName" name="firstName"><br/>
     <label for="lastName">Last Name: </label><input type="text" id="lastName" name="lastName">
 
-    <input type="submit" id="create" value="create">
+    <input type="submit" id="create" value="create"><br/><br/>
+
+    <label for="winner">Winner's Email: </label><input type="text" id="winner" name="winner"><br/>
+    <label for="winnerAuth">Winner's Password: </label><input type="password" id="winnerAuth" name="winnerAuth"><br/>
+    <label for="loser">Loser's Email: </label><input type="text" id="loser" name="loser"><br/>
+    <label for="loserAuth">Loser's Password: </label><input type="password" id="loserAuth" name="loserAuth"><br/>
+    <input type="submit" id="enterMatch" value="Enter Match">
     
   </body>
 </html>
