@@ -85,6 +85,17 @@ var User = new Schema({
   rating    : {type: Number, default: 1000}, 
   user_id   : ObjectId
 });
+
+app.get("/u", function(req, res){
+  mongoose.connect(config.databaseURI);
+  
+  User = mongoose.model("User", User);
+  User.find({}, {email: 1}, function(err, users){
+    for(var i = 0; i < users.length; i++)
+        users[i] = users[i].email;
+    res.end(JSON.stringify(users));
+  });
+});
   
 app.post("/u/:email", function(req, res){
   mongoose.connect(config.databaseURI);
