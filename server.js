@@ -119,15 +119,10 @@ app.get("/u/:email", function(req, res){
   mongoose.connect(config.databaseURI);
   User = mongoose.model("User", User);
 
-  User.find({email: req.params.email}, function(err, user){
+  User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1}, function(err, user){
     var user = user[0];
-    var output = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        rating: user.rating
-    }
     res.writeHead(200, {"Content-Type": "text/plain"});
-    res.end(JSON.stringify(output));
+    res.end(JSON.stringify(user));
   });
 });
 
