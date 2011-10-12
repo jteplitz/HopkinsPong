@@ -66,6 +66,8 @@ app.post("/m", function(req, res){
             var ratings = updateRatings(winner.rating, loser.rating);
             winner.rating = ratings[0];
             loser.rating = ratings[1];
+            winner.wins++;
+            loser.losses++;
             winner.save();
             loser.save();
             
@@ -82,7 +84,9 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
-  rating    : {type: Number, default: 1000}, 
+  rating    : {type: Number, default: 1000},
+  wins : {type: Number, default: 0},
+  losses : {type: Number, default: 0},
   user_id   : ObjectId
 });
 
@@ -119,7 +123,7 @@ app.get("/u/:email", function(req, res){
   mongoose.connect(config.databaseURI);
   User = mongoose.model("User", User);
 
-  User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1}, function(err, user){
+  User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, function(err, user){
     var user = user[0];
     res.writeHead(200, {"Content-Type": "text/plain"});
     res.end(JSON.stringify(user));
