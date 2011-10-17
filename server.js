@@ -88,15 +88,23 @@ var User = new Schema({
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
-});
+}); //need better email validation
 
 app.get("/u", function(req, res){
   mongoose.connect(config.databaseURI);
   
   User = mongoose.model("User", User);
-  User.find({}, {email: 1}, function(err, users){
-    for(var i = 0; i < users.length; i++)
-        users[i] = users[i].email;
+  var query = User.find();
+  query.sort("rating", -1);
+  query.exec(function(err, users){
+    for(var i = 0; i < users.length; i++){
+        users[i] = {
+          email: users[i].email,
+          wins: users[i].wins,
+          losses: users[i].losses,
+          rating: i
+        }
+    }
     res.end(JSON.stringify(users));
   });
 });
