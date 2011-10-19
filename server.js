@@ -49,8 +49,9 @@ app.post("/m", function(req, res){
     console.log("adding match between " + req.body.winner + " and " + req.body.loser);
     mongoose.connect(config.databaseURI);
     User = mongoose.model("User", User);
+    Match = mongoose.model("Match", Match);
     User.find({email: req.body.winner}, function(err, winner) {
-        var winner = winner[0];
+        winner = winner[0];
         if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
             res.writeHead(401, {"Content-Type": "text/plain"});
             res.end("You are not authorized to view this page");
@@ -68,10 +69,50 @@ app.post("/m", function(req, res){
             loser.rating = ratings[1];
             winner.wins++;
             loser.losses++;
+            match = new Match({
+                winner: req.body.winner,
+                loser: req.body.loser,
+                new_winner_rating: winner.rating,
+                new_loser_rating: loser.rating
+            });
             winner.save();
             loser.save();
+            match.save();
             
             res.end(JSON.stringify({error: 0, msg: "Successfully entered match"})); // this is going to say it was a success even when it was not, we should probbably fix that.
+        });
+    });
+});
+
+app.get("/u/:email", function(req, res){
+    mongoose.connect(config.databaseURI);
+    User = mongoose.model("User", User);
+    Match = mongoose.model("Match", Match);
+    User.find({email: req.params.email}, {password: 1}, function(err, user) {
+        user = user[0];
+        if(!authenticateReq(user.password, req.params.email, "/u/" + req.params.email, req.header("Authentication"))){
+            res.writeHead(401, {"Content-Type": "text/plain"});
+            res.end("You are not authorized to view this page");
+            return;
+        }
+        Match.find({$or: [{winner: req.params.email}, {loser: req.params.email}]}, function(err, matches) {
+            var outputs = [];
+            for(var i = 0; i < matches.length; i++) {
+                var output = {
+                    date: matches[i].date
+                };
+                if(matches[i].winner == req.params.email) {
+                    output.against = matches[i].loser;
+                    output.won = true;
+                    output.new_rating = matches[i].new_winner_rating;
+                } else {
+                    output.against = matches[i].winner;
+                    output.won = false;
+                    output.new_rating = matches[i].new_loser_rating;
+                }
+                outputs.push(output);
+            }
+            res.end(JSON.stringify(output));
         });
     });
 });
@@ -88,6 +129,13 @@ var User = new Schema({
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
+});
+var Match = new Schema({
+    winner: String,
+    loser: String,
+    new_winner_rating: Number,
+    new_loser_rating: Number,
+    date: {type: Date, default: Date.now}
 });
 
 app.get("/u", function(req, res){
