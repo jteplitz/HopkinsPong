@@ -102,6 +102,7 @@ app.get("/u", function(req, res){
           email: users[i].email,
           wins: users[i].wins,
           losses: users[i].losses,
+          firstName: users[i].firstName,
           rating: i
         }
     }
