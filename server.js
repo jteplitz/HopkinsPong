@@ -151,7 +151,10 @@ function authenticateReq(password, email, uri, hash){
   return authHash == hash;
 }
 
-app.get("/*", function(req, res){
+app.get("/*?", function(req, res){
+  if (req.url == "/"){
+    req.url = "/index.html";
+  }
   var filename = path.join(process.cwd(), req.url);  
   path.exists(filename, function(exists) {  
     if(!exists) {  
