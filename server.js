@@ -94,7 +94,7 @@ app.post("/m", function(req, res){
     });
 });
 
-app.get("/u/:email", function(req, res){
+app.get("/m/:email", function(req, res){
     mongoose.connect(config.databaseURI);
     User = mongoose.model("User", User);
     Match = mongoose.model("Match", Match);
