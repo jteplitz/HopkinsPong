@@ -105,7 +105,9 @@ app.get("/m/:email", function(req, res){
             res.end("You are not authorized to view this page");
             return;
         }
-        Match.find({$or: [{winner: req.params.email}, {loser: req.params.email}]}, function(err, matches) {
+        var query = Match.find({$or: [{winner: req.params.email}, {loser: req.params.email}]});
+        query.sort("date", -1)
+        query.exec(function(err, matches) {
             var outputs = [];
             for(var i = 0; i < matches.length; i++) {
                 var output = {
@@ -122,7 +124,7 @@ app.get("/m/:email", function(req, res){
                 }
                 outputs.push(output);
             }
-            res.end(JSON.stringify(output));
+            res.end(JSON.stringify(outputs));
         });
     });
 });
