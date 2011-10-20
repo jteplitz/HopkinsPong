@@ -144,6 +144,11 @@ app.get("/u/:email", function(req, res){
   User = mongoose.model("User", User);
 
   User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, function(err, user){
+    if (user.length == 0){
+      res.writeHead(400, {"Content-Type": "text/plain"});
+      res.end("Invalid email");
+      return;
+    }
     var user = user[0];
     res.writeHead(200, {"Content-Type": "text/plain"});
     res.end(JSON.stringify(user));
