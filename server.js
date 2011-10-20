@@ -51,13 +51,23 @@ app.post("/m", function(req, res){
     User = mongoose.model("User", User);
     Match = mongoose.model("Match", Match);
     User.find({email: req.body.winner}, function(err, winner) {
-        winner = winner[0];
+        if (winner.length == 0){
+          res.writeHead(400, {"Content-Type": "text/plain"});
+          res.end("Invalid winner email");
+          return;
+        }
+        var winner = winner[0];
         if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
             res.writeHead(401, {"Content-Type": "text/plain"});
             res.end("You are not authorized to view this page");
             return;
         }
         User.find({email: req.body.loser}, function(err, loser) {
+            if (loser.length == 0){
+              res.writeHead(400, {"Content-Type": "text/plain"});
+              res.end("Invalid losser email");
+              return;
+            }
             var loser = loser[0];
             if (!authenticateReq(loser.password, req.body.loser, "/m", req.body.loserAuth)){
                 res.writeHead(401, {"Content-Type": "text/plain"});
@@ -129,7 +139,7 @@ var User = new Schema({
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
-});
+}); //need better email validation
 var Match = new Schema({
     winner: String,
     loser: String,
@@ -137,14 +147,23 @@ var Match = new Schema({
     new_loser_rating: Number,
     date: {type: Date, default: Date.now}
 });
-
 app.get("/u", function(req, res){
   mongoose.connect(config.databaseURI);
   
   User = mongoose.model("User", User);
-  User.find({}, {email: 1}, function(err, users){
-    for(var i = 0; i < users.length; i++)
-        users[i] = users[i].email;
+  var query = User.find();
+  query.sort("rating", -1);
+  query.exec(function(err, users){
+    for(var i = 0; i < users.length; i++){
+        users[i] = {
+          email: users[i].email,
+          wins: users[i].wins,
+          losses: users[i].losses,
+          firstName: users[i].firstName,
+          lastName: users[i].lastName,
+          rating: i
+        }
+    }
     res.end(JSON.stringify(users));
   });
 });
@@ -172,6 +191,11 @@ app.get("/u/:email", function(req, res){
   User = mongoose.model("User", User);
 
   User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, function(err, user){
+    if (user.length == 0){
+      res.writeHead(400, {"Content-Type": "text/plain"});
+      res.end("Invalid email");
+      return;
+    }
     var user = user[0];
     res.writeHead(200, {"Content-Type": "text/plain"});
     res.end(JSON.stringify(user));
@@ -189,7 +213,10 @@ function authenticateReq(password, email, uri, hash){
   return authHash == hash;
 }
 
-app.get("/*", function(req, res){
+app.get("/*?", function(req, res){
+  if (req.url == "/"){
+    req.url = "/index.html";
+  }
   var filename = path.join(process.cwd(), req.url);  
   path.exists(filename, function(exists) {  
     if(!exists) {  
