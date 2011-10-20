@@ -50,6 +50,11 @@ app.post("/m", function(req, res){
     mongoose.connect(config.databaseURI);
     User = mongoose.model("User", User);
     User.find({email: req.body.winner}, function(err, winner) {
+        if (winner.length == 0){
+          res.writeHead(400, {"Content-Type": "text/plain"});
+          res.end("Invalid winner email");
+          return;
+        }
         var winner = winner[0];
         if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
             res.writeHead(401, {"Content-Type": "text/plain"});
@@ -57,6 +62,11 @@ app.post("/m", function(req, res){
             return;
         }
         User.find({email: req.body.loser}, function(err, loser) {
+            if (loser.length == 0){
+              res.writeHead(400, {"Content-Type": "text/plain"});
+              res.end("Invalid losser email");
+              return;
+            }
             var loser = loser[0];
             if (!authenticateReq(loser.password, req.body.loser, "/m", req.body.loserAuth)){
                 res.writeHead(401, {"Content-Type": "text/plain"});
