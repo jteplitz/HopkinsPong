@@ -39,7 +39,7 @@ path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
 hashlib  = require("hashlib"),
-config   = require("./config"),
+config   = require("./config/config"),
 express  = require("express");
 
 var app = express.createServer(express.logger());
@@ -218,6 +218,12 @@ function authenticateReq(password, email, uri, hash){
 app.get("/*?", function(req, res){
   if (req.url == "/"){
     req.url = "/index.html";
+  }
+  console.log(req.url);
+  if (req.url.split("/")[1] == "config"){
+    res.writeHead(401, {"Content-Type": "text/plain"});
+    res.end("You are not authorized to view this. GO AWAY!!! Try hacking our database now bitch");
+    return;
   }
   var filename = path.join(process.cwd(), req.url);  
   path.exists(filename, function(exists) {  
