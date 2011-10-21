@@ -220,12 +220,7 @@ app.get("/*?", function(req, res){
     req.url = "/index.html";
   }
   console.log(req.url);
-  if (req.url.split("/")[1] == "config"){
-    res.writeHead(401, {"Content-Type": "text/plain"});
-    res.end("You are not authorized to view this. GO AWAY!!! Try hacking our database now bitch");
-    return;
-  }
-  var filename = path.join(process.cwd(), req.url);  
+  var filename = path.join(process.cwd(), "www/", req.url);  
   path.exists(filename, function(exists) {  
     if(!exists) {  
       res.writeHead(404, {"Content-Type": "text/plain"});  
