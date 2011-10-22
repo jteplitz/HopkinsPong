@@ -17,11 +17,33 @@ $(document).ready(function(){
       loser: $("#loser").val(),
       loserAuth: SHA256(SHA256($("#loserAuth").val()) + $("#loser").val() + "/m")
     };
+
+    $("#errors").empty();
+    $(".error").removeClass("error");
+
     $.ajax("/m", {
       type: "POST",
       data: params,
       success: function(data){
         location.reload();
+      },
+      error: function(error){
+        var response = JSON.parse(error.responseText);
+
+        if (response.error > 100 && response.error < 200){
+          $("#errors").append("<div id=\"submitError\" data-alert=\"error\" class=\"fade in alert-message error\">" + 
+                              "<a class=\"close\" href=\"#\">x</a><p>" + response.msg +
+                              "</p></div>");
+          $("#submitError").alert();
+          
+          var inputIds = {
+            101: "#winnerContainer",
+            102: "#winnerPassContainer",
+            103: "#loserPassContainer",
+            104: "#loserPassContainer"
+          }
+          $(inputIds[response.error]).addClass("error");
+        }
       }
     });
   });

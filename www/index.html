@@ -4,6 +4,7 @@
 		<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
     <link rel="stylesheet" href="style/main.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script src="script/bootstrap-alerts.js"></script>
 		<script src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
     <script src="script/main.js"></script>
 		<script src="script/sha.js" type="text/javascript"></script>
@@ -32,14 +33,17 @@
 			<div class="container-fluid">
         <br />
 				<div class="sidebar">
-          <center><h1>Submit A Match</h1>
+          <center><h1>Submit A Match</h1></center>
           <br />
           <br />
-          Winner's Email: <input type="text" id="winner" name="winner"><br/>
-          Winner's Password: <input type="password" id="winnerAuth" name="winnerAuth"><br/>
-          Loser's Email: <input type="text" id="loser" name="loser"><br/>
-          Loser's Password: <input type="password" id="loserAuth" name="loserAuth"><br/>
-          <input type="submit" class="success btn" id="enterMatch" value="Enter Match"></center>
+          <span id="errors"></span>
+          <form class="form-stacked" onSubmit="return false;">
+            <div class="clearfix" id="winnerContainer"><label for='winner'>Winner's Email:</label><input type="text" id="winner" name="winner"></div>
+            <div class='clearfix' id="winnerPassContainer"><label for="winnerAuth">Winner's Password:</label> <input type="password" id="winnerAuth" name="winnerAuth"></div>
+            <div class='clearfix' id="loserContainer"><label for="loser">Loser's Email: </label><input type="text" id="loser" name="loser"></div>
+            <div class="clearfix" id="loserPassContainer"><label for="loserAuth">Loser's Password: </label><input type="password" id="loserAuth" name="loserAuth"></div>
+            <center><input type="submit" class="success btn" id="enterMatch" value="Enter Match"></center>
+          </form>
         </div>
 			 <div class="content">
         <center><img src="image/hopkins.gif" alt="Paddle and Logo"/><center> 

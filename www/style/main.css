@@ -1,3 +1,15 @@
 .content img{
   padding-bottom: 10px;
 }
+
+.form-stacked{
+  padding-left: 0px;
+}
+
+.sidebar .clearfix label{
+  text-align: center;
+}
+
+.form-stacked div.clearfix.error{
+  padding-left: 5px;
+}

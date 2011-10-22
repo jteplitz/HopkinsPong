@@ -53,25 +53,37 @@ app.post("/m", function(req, res){
     User.find({email: req.body.winner}, function(err, winner) {
         if (winner.length == 0){
           res.writeHead(400, {"Content-Type": "text/plain"});
-          res.end("Invalid winner email");
+          res.end(JSON.stringify({
+            error: 101,
+            msg: "The winner email is invalid"
+          }));
           return;
         }
         var winner = winner[0];
         if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
             res.writeHead(401, {"Content-Type": "text/plain"});
-            res.end("You are not authorized to view this page");
+            res.end(JSON.stringify({
+              error: 102,
+              msg: "The winner's password is invalid"
+            }));
             return;
         }
         User.find({email: req.body.loser}, function(err, loser) {
             if (loser.length == 0){
               res.writeHead(400, {"Content-Type": "text/plain"});
-              res.end("Invalid losser email");
+              res.end(JSON.stringify({
+                error: 103,
+                msg: "The loser's email is invalid"
+              }));
               return;
             }
             var loser = loser[0];
             if (!authenticateReq(loser.password, req.body.loser, "/m", req.body.loserAuth)){
                 res.writeHead(401, {"Content-Type": "text/plain"});
-                res.end("You are not authorized to view this page");
+                res.end(JSON.stringify({
+                  error: 104,
+                  msg: "The loser's password is invalid"
+                }));
                 return;
             }
             var ratings = updateRatings(winner.rating, loser.rating);
