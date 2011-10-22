@@ -55,7 +55,7 @@ app.post("/m", function(req, res){
           res.writeHead(400, {"Content-Type": "text/plain"});
           res.end(JSON.stringify({
             error: 101,
-            msg: "The winner email is invalid"
+            msg: "The winner's email is invalid"
           }));
           return;
         }
