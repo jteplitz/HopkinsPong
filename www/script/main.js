@@ -39,7 +39,7 @@ $(document).ready(function(){
           var inputIds = {
             101: "#winnerContainer",
             102: "#winnerPassContainer",
-            103: "#loserPassContainer",
+            103: "#loserContainer",
             104: "#loserPassContainer"
           }
           $(inputIds[response.error]).addClass("error");
