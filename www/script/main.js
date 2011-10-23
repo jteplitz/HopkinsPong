@@ -1,9 +1,10 @@
 /*javascript*/
 $(document).ready(function(){
 
-	var jqxhr = $.get("/u")
+	var jqxhr = $.get("/u", {
+    _a: new Date().getTime()
+  })
 	.success(function(data) {
-		data = JSON.parse(data);
 		$("#cool").tmpl(data).appendTo("#table");
 	})
 	.error(function() {

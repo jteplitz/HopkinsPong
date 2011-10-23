@@ -52,7 +52,7 @@ app.post("/m", function(req, res){
     Match = mongoose.model("Match", Match);
     User.find({email: req.body.winner}, function(err, winner) {
         if (winner.length == 0){
-          res.writeHead(400, {"Content-Type": "text/plain"});
+          res.writeHead(401, {"Content-Type": "application/json"});
           res.end(JSON.stringify({
             error: 101,
             msg: "The winner's email is invalid"
@@ -61,7 +61,7 @@ app.post("/m", function(req, res){
         }
         var winner = winner[0];
         if (!authenticateReq(winner.password, req.body.winner, "/m", req.body.winnerAuth)){
-            res.writeHead(401, {"Content-Type": "text/plain"});
+            res.writeHead(401, {"Content-Type": "application/json"});
             res.end(JSON.stringify({
               error: 102,
               msg: "The winner's password is invalid"
@@ -70,7 +70,7 @@ app.post("/m", function(req, res){
         }
         User.find({email: req.body.loser}, function(err, loser) {
             if (loser.length == 0){
-              res.writeHead(400, {"Content-Type": "text/plain"});
+              res.writeHead(401, {"Content-Type": "application/json"});
               res.end(JSON.stringify({
                 error: 103,
                 msg: "The loser's email is invalid"
@@ -79,7 +79,7 @@ app.post("/m", function(req, res){
             }
             var loser = loser[0];
             if (!authenticateReq(loser.password, req.body.loser, "/m", req.body.loserAuth)){
-                res.writeHead(401, {"Content-Type": "text/plain"});
+                res.writeHead(401, {"Content-Type": "application/json"});
                 res.end(JSON.stringify({
                   error: 104,
                   msg: "The loser's password is invalid"
@@ -101,6 +101,7 @@ app.post("/m", function(req, res){
             loser.save();
             match.save();
             
+            res.writeHead(200, {"Content-Type": "application/json"});
             res.end(JSON.stringify({error: 0, msg: "Successfully entered match"})); // this is going to say it was a success even when it was not, we should probbably fix that.
         });
     });
@@ -136,6 +137,7 @@ app.get("/m/:email", function(req, res){
                 }
                 outputs.push(output);
             }
+            res.writeHead(200, {"Content-Type": "applcation/json"});
             res.end(JSON.stringify(outputs));
         });
     });
@@ -178,6 +180,7 @@ app.get("/u", function(req, res){
           rating: i
         }
     }
+    res.writeHead(200, {"Content-Type": "application/json"});
     res.end(JSON.stringify(users));
   });
 });
@@ -195,6 +198,7 @@ app.post("/u/:email", function(req, res){
   });
   user.save();
   
+  res.writeHead(200, {"Content-Type": "application/json"});
   res.end(JSON.stringify({error: 0, msg: "Successfully created user"})); // this is going to say it was a success even when it was not, we should probbably fix that.
 });
 
@@ -211,7 +215,7 @@ app.get("/u/:email", function(req, res){
       return;
     }
     var user = user[0];
-    res.writeHead(200, {"Content-Type": "text/plain"});
+    res.writeHead(200, {"Content-Type": "application/json"});
     res.end(JSON.stringify(user));
   });
 });
