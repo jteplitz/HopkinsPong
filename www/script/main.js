@@ -41,7 +41,8 @@ $(document).ready(function(){
             101: "#winnerContainer",
             102: "#winnerPassContainer",
             103: "#loserContainer",
-            104: "#loserPassContainer"
+            104: "#loserPassContainer",
+            105: "#loserContainer, #winnerContainer"
           }
           $(inputIds[response.error]).addClass("error");
         }
