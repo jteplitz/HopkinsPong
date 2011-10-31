@@ -51,7 +51,7 @@ mongoose.connect(config.databaseURI);
 var Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
 var User = new Schema({
-  email     : {type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true }},
+  email     : {type: String, validate: [validateEmail, 'an email is required'], index: { unique: true }},
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
@@ -225,10 +225,15 @@ app.post("/u/:email", function(req, res){
     firstName:  req.body.firstName,
     lastName:   req.body.lastName
   });
-  user.save();
-  
-  res.writeHead(200, {"Content-Type": "application/json"});
-  res.end(JSON.stringify({error: 0, msg: "Successfully created user"})); // this is going to say it was a success even when it was not, we should probbably fix that.
+  user.save(function(err){
+    if (err){
+      res.writeHead(400, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({error: 210, msg: err.message}));
+    }else{
+      res.writeHead(200, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({error: 0, msg: "Successfully created user"}));
+    }
+  });
 });
 
 app.get("/u/:email", function(req, res){
@@ -311,6 +316,11 @@ app.get("/*?", function(req, res){
 
 function validatePresenceOf(value){
   return value && value.length;
+}
+
+function validateEmail(value){
+  var emailRegex = new RegExp(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
+  return emailRegex.test(value);
 }
 
 function authenticateReq(password, email, uri, hash){
