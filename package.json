@@ -4,6 +4,7 @@
   "dependencies": {
     "express": "2.2.0",
     "mongoose": "2.2.3",
-    "hashlib": "1.0.1"
+    "hashlib": "1.0.1",
+    "Templ8": "0.3.0"
   }
 }

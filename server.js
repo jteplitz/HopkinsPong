@@ -41,15 +41,37 @@ mongoose = require("mongoose"),
 hashlib  = require("hashlib"),
 config   = require("./config/config"),
 express  = require("express");
+Templ8   = require("Templ8");
 
 var app = express.createServer(express.logger());
 app.use(express.bodyParser());
 
+//mongoose stuff
+mongoose.connect(config.databaseURI);
+var Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
+var User = new Schema({
+  email     : {type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true }},
+  password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
+  firstName : String,
+  lastName  : String,
+  rating    : {type: Number, default: 1000},
+  wins : {type: Number, default: 0},
+  losses : {type: Number, default: 0},
+  user_id   : ObjectId
+}); //need better email validation
+var Match = new Schema({
+    winner: String,
+    loser: String,
+    new_winner_rating: Number,
+    new_loser_rating: Number,
+    date: {type: Date, default: Date.now}
+});
+User = mongoose.model("User", User);
+Match = mongoose.model("Match", Match);
+
 app.post("/m", function(req, res){
     console.log("adding match between " + req.body.winner + " and " + req.body.loser);
-    mongoose.connect(config.databaseURI);
-    User = mongoose.model("User", User);
-    Match = mongoose.model("Match", Match);
     User.find({email: req.body.winner}, function(err, winner) {
         if (winner.length == 0){
           res.writeHead(401, {"Content-Type": "application/json"});
@@ -108,16 +130,8 @@ app.post("/m", function(req, res){
 });
 
 app.get("/m/:email", function(req, res){
-    mongoose.connect(config.databaseURI);
-    User = mongoose.model("User", User);
-    Match = mongoose.model("Match", Match);
     User.find({email: req.params.email}, {password: 1}, function(err, user) {
         user = user[0];
-        if(!authenticateReq(user.password, req.params.email, "/u/" + req.params.email, req.header("Authentication"))){
-            res.writeHead(401, {"Content-Type": "text/plain"});
-            res.end("You are not authorized to view this page");
-            return;
-        }
         var query = Match.find({$or: [{winner: req.params.email}, {loser: req.params.email}]});
         query.sort("date", -1)
         query.exec(function(err, matches) {
@@ -144,29 +158,8 @@ app.get("/m/:email", function(req, res){
 });
 
 // we should probbably create a schema.js file for these or something
-var Schema = mongoose.Schema,
-    ObjectId = Schema.ObjectId;
-var User = new Schema({
-  email     : {type: String, validate: [validatePresenceOf, 'an email is required'], index: { unique: true }},
-  password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
-  firstName : String,
-  lastName  : String,
-  rating    : {type: Number, default: 1000},
-  wins : {type: Number, default: 0},
-  losses : {type: Number, default: 0},
-  user_id   : ObjectId
-}); //need better email validation
-var Match = new Schema({
-    winner: String,
-    loser: String,
-    new_winner_rating: Number,
-    new_loser_rating: Number,
-    date: {type: Date, default: Date.now}
-});
 app.get("/u", function(req, res){
-  mongoose.connect(config.databaseURI);
   
-  User = mongoose.model("User", User);
   var query = User.find();
   query.sort("rating", -1);
   query.exec(function(err, users){
@@ -186,10 +179,8 @@ app.get("/u", function(req, res){
 });
   
 app.post("/u/:email", function(req, res){
-  mongoose.connect(config.databaseURI);
   console.log(req.params, req.params.password);
 
-  User = mongoose.model("User", User);
   var user = new User({
     email:      req.body.email,
     password:   req.body.password,
@@ -205,10 +196,8 @@ app.post("/u/:email", function(req, res){
 app.get("/u/:email", function(req, res){
   console.log(config.databaseURI);
   console.log("getting account, " + req.header("Authentication"));
-  mongoose.connect(config.databaseURI);
-  User = mongoose.model("User", User);
 
-  User.find({email: req.params.email}, {firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, function(err, user){
+  getUser(req.params.email, function(err, file){
     if (user.length == 0){
       res.writeHead(400, {"Content-Type": "text/plain"});
       res.end("Invalid email");
@@ -220,15 +209,37 @@ app.get("/u/:email", function(req, res){
   });
 });
 
-function validatePresenceOf(value){
-  return value && value.length;
-}
+app.get("/user/:email", function(req, res){
+  getUser(req.params.email, function(err, user){
+    console.log("got user");
+    if (user.length == 0){
+      res.writeHead(404, {"Content-Type": "text/plain"});
+      res.end("We need a 404 page");
+      return;
+    }
+    console.log("user exists");
 
-function authenticateReq(password, email, uri, hash){
-  console.log(password, email, uri);
-  var authHash = hashlib.sha256(password + email + uri);
-  console.log(authHash); 
-  return authHash == hash;
+    var user = user[0];
+    fs.readFile(path.join(process.cwd(), "www/user_page.html.tmpl"), "binary", function(err, file){
+      console.log("read the file");
+      console.log(err);
+
+      var file = Templ8.gsub(file, {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        ratio: Math.round((user.wins) / (user.wins + user.losses) * 100)
+      }, /\^\{([^\}]+)\}/g);
+
+      res.writeHead(200);
+      res.end(file, "binary");
+
+    });
+  });
+});
+
+function getUser(email, callback){
+  User.find({email: email}, {email: 1, firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, callback);
 }
 
 app.get("/*?", function(req, res){
@@ -256,6 +267,17 @@ app.get("/*?", function(req, res){
     });  
   });
 });
+
+function validatePresenceOf(value){
+  return value && value.length;
+}
+
+function authenticateReq(password, email, uri, hash){
+  console.log(password, email, uri);
+  var authHash = hashlib.sha256(password + email + uri);
+  console.log(authHash); 
+  return authHash == hash;
+}
 
 var port = process.env.PORT || 3000;
 app.listen(port, function(){

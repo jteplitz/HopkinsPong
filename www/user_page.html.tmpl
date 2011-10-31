@@ -1,0 +1,144 @@
+<html>
+	<head>
+    	<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css" />
+      <link rel="stylesheet" href="../../style/main.css" />
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+      <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+      <script type="text/javascript" src="../../script/highcharts.js"></script>
+      <script type="text/x-jquery-tmpl" id="match_tmpl">
+        <tr>
+          <td>${opponent}</td>
+          <td>${result}</td>
+          <td>${history}</td>
+        </tr>
+      </script>
+      <script type="text/javascript">
+        $(document).ready(function(){
+          var chart = new Highcharts.Chart({
+            chart: {
+              renderTo: "chartContainer",
+              defaultSeriesType: "line"
+            },
+            title: {
+              text: "Ranking History",
+              x: -20 //center for some reason
+            },
+            xAxis: {
+              type: "datetime",
+              dateTimeLabelFormats: {
+                month: "%b %e",
+                year: "%b"
+              }
+            },
+            yAxis: {
+              title: "Ranking",
+              reversed: true,
+              plotLines: [{
+                value: 0,
+                width: 3,
+                color: "#808080"
+              }]
+            },
+            legend: {
+              enabled: false
+            },
+            series: [{
+              name: "Ranking",
+              data: [
+                [Date.UTC(2011, 8, 20), 12],
+                [Date.UTC(2011, 8, 25), 8],
+                [Date.UTC(2011, 9, 2), 5],
+                [Date.UTC(2011, 9, 3), 7],
+                [Date.UTC(2011, 9, 5), 2]
+              ]
+            }]
+          });
+
+          $.ajax("/m/^{email}", {
+            type: "GET",
+            success: function(data){
+              var template = [];
+              for (var i = 0; i < data.length; i++){
+                template[i] = {};
+                template[i].opponent = data[i].against;
+                template[i].result   = (data[i].won) ? "Win" : "Loss",
+                template[i].history  = "Coming Soon..."
+              }
+              $("#match_tmpl").tmpl(template).appendTo("#matchTable");
+            }
+          });
+        });
+      </script>
+	</head>
+
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="container-fluid">
+          <a class='brand' href="ranking.html">Hopkins Pong</a>
+          <ul><li><a>Login</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="sidebar">
+        <center><h1>Personal Info</h1></center>
+
+        <table class="zebra-striped">
+          <tr>
+            <th>Name</th>
+              <tbody>
+                <td>^{firstName}</td>
+              </tbody>
+          </tr>
+        </table>
+        
+        <table class="zebra-striped">
+          <tr>
+            <th>Last Name</th>
+            <tbody>
+              <td>^{lastName}</td>
+            </tbody>
+          </tr>
+        </table>
+
+       <table class="zebra-striped">
+         <tr>
+           <th>Email</th>
+           <tbody>
+             <td>^{email}</td>
+           </tbody>
+         </tr>
+       </table>
+       
+       <table id="table" class="zebra-striped">
+         <tr>
+           <th>Win Percentage</th>
+           <tbody>
+             <td>^{ratio}%</td>
+           </tbody>
+        </tr>
+      </table>
+    </div>
+
+    <div class="content">
+      <div id="chartContainer">
+      </div> 
+      <center><h1>Match History</h1></center> 
+
+      <table id="matchTable" class="zebra-striped">
+        <tr>
+          <th>Opponent</th>
+          <th>Win/Lose?</th>
+          <th>History W/ Opponent</th>
+        </tr>
+      </table>
+
+    </div>
+
+  </div>
+</body>
+
+</html>
