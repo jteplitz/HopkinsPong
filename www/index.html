@@ -9,10 +9,10 @@
     <script type="text/javascript" src="script/main.js"></script>
 		<script src="script/sha.js" type="text/javascript"></script>
 		<script id="cool" type="text/x-jquery-tmpl">
-			<tr>
-				<td><a href="${link}">${firstName}</td>
-				<td>${wins}</td>
-				<td>${losses}</td>
+			<tr class='cursor' onclick="goTo('${link}')">
+        <td>${firstName}</td>
+        <td>${wins}</td>
+        <td>${losses}</td>
 			</tr>
 		</script>
 	</head>

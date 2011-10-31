@@ -131,11 +131,17 @@ app.post("/m", function(req, res){
 
 app.get("/m/:email", function(req, res){
     User.find({email: req.params.email}, {password: 1}, function(err, user) {
+        if (!user){
+          console.log("no user");
+          return;
+        }
         user = user[0];
+        console.log("got user");
         var query = Match.find({$or: [{winner: req.params.email}, {loser: req.params.email}]});
         query.sort("date", -1)
         query.exec(function(err, matches) {
             var outputs = [];
+            var history = {};
             for(var i = 0; i < matches.length; i++) {
                 var output = {
                     date: matches[i].date
@@ -144,14 +150,34 @@ app.get("/m/:email", function(req, res){
                     output.against = matches[i].loser;
                     output.won = true;
                     output.new_rating = matches[i].new_winner_rating;
+                    if (!history[matches[i].loser]){
+                      history[matches[i].loser] = {
+                        wins: 1,
+                        losses: 0
+                      };
+                    }else{
+                      history[matches[i].loser].wins++;
+                    }
                 } else {
                     output.against = matches[i].winner;
                     output.won = false;
                     output.new_rating = matches[i].new_loser_rating;
+                    if (!history[matches[i].winner]){
+                      history[matches[i].winner] = {
+                        wins: 0,
+                        losses: 1
+                      };
+                    }else{
+                      history[matches[i].winner].losses++;
+                    }
                 }
                 outputs.push(output);
             }
-            res.writeHead(200, {"Content-Type": "applcation/json"});
+            console.log("made outputs");
+            for (i = 0; i < outputs.length; i++){
+              outputs[i].history = history[outputs[i].against];
+            }
+            res.writeHead(200, {"Content-Type": "application/json"});
             res.end(JSON.stringify(outputs));
         });
     });
@@ -170,7 +196,8 @@ app.get("/u", function(req, res){
           losses: users[i].losses,
           firstName: users[i].firstName,
           lastName: users[i].lastName,
-          rating: i
+          rating: i,
+          link: "/" + users[i].email
         }
     }
     res.writeHead(200, {"Content-Type": "application/json"});
@@ -209,8 +236,10 @@ app.get("/u/:email", function(req, res){
   });
 });
 
-app.get("/user/:email", function(req, res){
-  getUser(req.params.email, function(err, user){
+app.get(/^\/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$)/, function(req, res){
+  var email = req.params[0]
+  console.log(req.params);
+  getUser(email, function(err, user){
     console.log("got user");
     if (user.length == 0){
       res.writeHead(404, {"Content-Type": "text/plain"});
@@ -223,12 +252,13 @@ app.get("/user/:email", function(req, res){
     fs.readFile(path.join(process.cwd(), "www/user_page.html.tmpl"), "binary", function(err, file){
       console.log("read the file");
       console.log(err);
+      var ratio = Math.round((user.wins) / (user.wins + user.losses) * 100);
 
       var file = Templ8.gsub(file, {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        ratio: Math.round((user.wins) / (user.wins + user.losses) * 100)
+        ratio: (ratio) ? ratio : "0" 
       }, /\^\{([^\}]+)\}/g);
 
       res.writeHead(200);

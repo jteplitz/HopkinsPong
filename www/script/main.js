@@ -49,3 +49,7 @@ $(document).ready(function(){
     });
   });
 });
+
+function goTo(url){
+  window.location = url;
+}
