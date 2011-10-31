@@ -72,6 +72,17 @@ Match = mongoose.model("Match", Match);
 
 app.post("/m", function(req, res){
     console.log("adding match between " + req.body.winner + " and " + req.body.loser);
+    mongoose.connect(config.databaseURI);
+    User = mongoose.model("User", User);
+    Match = mongoose.model("Match", Match);
+    if (req.body.winner == req.body.loser){
+      res.writeHead(400, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({
+        error: 105,
+        msg: "You can't beat yourself"
+      }));
+      return;
+    }
     User.find({email: req.body.winner}, function(err, winner) {
         if (winner.length == 0){
           res.writeHead(401, {"Content-Type": "application/json"});
