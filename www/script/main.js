@@ -1,7 +1,10 @@
 /*javascript*/
 $(document).ready(function(){
 
-  $(".topbar").dropdown();
+  $(".topbar .dropdown-toggle").click(function(event){
+    $(".secondary-nav .dropdown").toggleClass("open");
+    console.log("click", $(".secondary-nav .dropdown"));
+  });
 
 	var jqxhr = $.get("/u", {
     _a: new Date().getTime()
