@@ -1,6 +1,8 @@
 /*javascript*/
 $(document).ready(function(){
 
+  $(".topbar").dropdown();
+
 	var jqxhr = $.get("/u", {
     _a: new Date().getTime()
   })

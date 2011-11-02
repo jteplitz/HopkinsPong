@@ -24,3 +24,15 @@ body{
 .cursor{
   cursor: pointer;
 }
+
+ul .dropdown-menu{
+  text-align: center;
+  max-width: 250px;
+  width: 250px;
+}
+
+ul .dropdown-menu input{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-right: 5px;
+}
