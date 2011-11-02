@@ -252,7 +252,7 @@ app.get("/u/:email", function(req, res){
   });
 });
 
-app.get(/^\/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$)/, function(req, res){
+app.get(/^\/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$)\.html/, function(req, res){
   var email = req.params[0]
   console.log(req.params);
   getUser(email, function(err, user){
