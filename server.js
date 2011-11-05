@@ -55,7 +55,7 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
-  rating    : {type: Number, default: 1000},
+  rating    : {type: Number, default: 1000, index: -1},
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
@@ -84,6 +84,7 @@ app.post("/m", function(req, res){
       return;
     }
     User.find({email: req.body.winner}, function(err, winner) {
+        console.log(winner);
         if (winner.length == 0){
           res.writeHead(401, {"Content-Type": "application/json"});
           res.end(JSON.stringify({
@@ -140,7 +141,7 @@ app.post("/m", function(req, res){
     });
 });
 
-app.get("/m/:email", function(req, res){
+app.get("/m/:email.html", function(req, res){
     User.find({email: req.params.email}, {password: 1}, function(err, user) {
         if (!user){
           console.log("no user");
