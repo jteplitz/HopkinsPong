@@ -55,7 +55,7 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
-  rating    : {type: Number, default: 1000, index: -1},
+  rating    : {type: Number, default: 1000, index: true},
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
@@ -83,8 +83,9 @@ app.post("/m", function(req, res){
       }));
       return;
     }
-    User.find({email: req.body.winner}, function(err, winner) {
+    User.find({email: req.body.winner}, {$returnKey: true}, function(err, winner){
         console.log(winner);
+        console.log(err, third);
         if (winner.length == 0){
           res.writeHead(401, {"Content-Type": "application/json"});
           res.end(JSON.stringify({
