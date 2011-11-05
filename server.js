@@ -55,7 +55,7 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
-  rating    : {type: Number, default: 1000, index: -1},
+  rating    : {type: Number, default: 1000, index: true},
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
