@@ -54,7 +54,7 @@ var User = new Schema({
   password  : {type: String, validate: [validatePresenceOf, 'a password is required']},
   firstName : String,
   lastName  : String,
-  rating    : {type: Number, default: 1000, index: true},
+  rating    : {type: Number, default: 1000, index: -1},
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
   user_id   : ObjectId
@@ -71,9 +71,6 @@ Match = mongoose.model("Match", Match);
 
 app.post("/m", function(req, res){
     console.log("adding match between " + req.body.winner + " and " + req.body.loser);
-    mongoose.connect(config.databaseURI);
-    User = mongoose.model("User", User);
-    Match = mongoose.model("Match", Match);
     if (req.body.winner == req.body.loser){
       res.writeHead(400, {"Content-Type": "application/json"});
       res.end(JSON.stringify({
