@@ -54,8 +54,45 @@ $(document).ready(function(){
       }
     });
   });
+
+	$("#searchBar").keyup(function(){
+		searchBarSubmit();
+	});
+
+  $("#searchBar").click(searchBarSubmit); // fixes error with x button in chrome
+
 });
 
 function goTo(url){
   window.location = url;
+}
+
+/** Search Bar */
+function searchBarSubmit() {
+	var v = new Array(); // Array of search queries, separated by spaces. (ex. "Hello World" --> ["Hello","World"])
+	v = $("#searchBar").val().toLowerCase().split(' '); // case insensitive
+  var rows = $("#table tr");  // find rows. THIS WILL NO LONGER BREAK IF ANOTHER TABLE IS INTRODUCED :)
+
+  if (v == ""){
+    for (var i = 1; i < rows.length; i++){
+      rows[i].style.display = "";
+    }
+  }
+
+	for ( var i = 1; i < rows.length; i++ ) { // i is index of for loop 1
+		var fullname = rows[i].innerText.toLowerCase(); // case insensitive
+
+		for ( var k = 0; k < v.length; k++ ) {// k is the index of for loop 2
+			var s = v[k]; // initialize search string s
+
+			if (!(s == "" || s == " ")){
+				if (fullname.search(s) == -1){ // -1 means the row does NOT contain the search string
+					rows[i].style.display='none'; // hide row
+					break;
+				} else {
+					rows[i].style.display = ''; // show row
+				}
+			}
+		}
+	}
 }

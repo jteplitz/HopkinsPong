@@ -46,7 +46,7 @@ var app = express.createServer(express.logger());
 app.use(express.bodyParser());
 
 //mongoose stuff
-mongoose.connect(process.env.databaseURL);
+mongoose.connect(process.env.databaseURL || "mongodb://localhost/test");
 var Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
 var User = new Schema({

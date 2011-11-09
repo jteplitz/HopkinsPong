@@ -36,3 +36,122 @@ ul .dropdown-menu input{
   margin-bottom: 5px;
   padding-right: 5px;
 }
+
+/* Search Bar formatting. Copied and slightly adapted from the jquerymobile open source project. http://www.jquerymobile.com */
+
+#searchForm{
+  background-origin: padding-box;
+  border-bottom-color: #B3B3B3;
+  border-bottom-style: solid;
+  border-bottom-width: 0px;
+  border-left-color: #B3B3B3;
+  border-left-style: solid;
+  border-left-width: 0px;
+  border-right-color: #B3B3B3;
+  border-right-style: solid;
+  border-right-width: 0px;
+  border-top-color: #B3B3B3;
+  border-top-style: solid;
+  border-top-width: 0px;
+  color: #3E3E3E;
+  display: block;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  height: 46px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  text-shadow: white 0px 1px 1px;
+}
+
+.searchInner{
+  -webkit-background-clip: padding-box;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.199219) 0px 1px 4px 0px inset;
+  background-attachment: scroll;
+  background-clip: padding-box;
+  background-color: #F0F0F0;
+  background-image: none;
+  background-origin: padding-box;
+  border-bottom-color: #B3B3B3;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-left-color: #B3B3B3;
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-right-color: #B3B3B3;
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-top-color: #B3B3B3;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  box-shadow: rgba(0, 0, 0, 0.199219) 0px 1px 4px 0px inset;
+  color: #333;
+  display: block;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  height: 34px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 5px;
+  padding-bottom: 0px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 0px;
+  position: relative;
+  text-shadow: white 0px 1px 0px;
+}
+
+#searchBar{
+  -webkit-appearance: none;
+  -webkit-rtl-ordering: logical;
+  -webkit-user-select: text;
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-color: transparent;
+  background-image: none;
+  background-origin: padding-box;
+  border-bottom-color: #333;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-left-color: #333;
+  border-left-style: none;
+  border-left-width: 0px;
+  border-right-color: #333;
+  border-right-style: none;
+  border-right-width: 0px;
+  border-top-color: #333;
+  border-top-style: none;
+  border-top-width: 0px;
+  color: #333;
+  cursor: auto;
+  display: block;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  height: 22px;
+  letter-spacing: normal;
+  line-height: 22px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  outline-color: #333;
+  outline-style: none;
+  outline-width: 0px;
+  padding-bottom: 6px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 6px;
+  text-align: -webkit-auto;
+  text-indent: 0px;
+  text-shadow: white 0px 1px 0px;
+  text-transform: none;
+  word-spacing: 0px;
+  width: 100% !important
+}
