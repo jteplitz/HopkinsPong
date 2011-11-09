@@ -39,7 +39,6 @@ path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
 hashlib  = require("hashlib"),
-config   = require("./config/config"),
 express  = require("express");
 Templ8   = require("Templ8");
 
@@ -47,7 +46,7 @@ var app = express.createServer(express.logger());
 app.use(express.bodyParser());
 
 //mongoose stuff
-mongoose.connect(config.databaseURI);
+mongoose.connect(process.env.databaseURL);
 var Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
 var User = new Schema({
