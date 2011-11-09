@@ -1,3 +1,0 @@
-All configuration files are to be kept in this directory.
-For security reasons we did not include a config.js file in this repo. To make this app work you must craete a config.js file inside of the config folder.
-The file should have one line for the variable module.exports.databaseURI and that should equal your FULL db connect url. It should look something like "mongodb://USERNAME:PASSWORD@SERVER". 
