@@ -1,2 +1,2 @@
-For security reasons we did not include a config.js file in this repo. To make this app work you must craete a config.js file inside of the config folder.
-The file should have one line for the variable module.exports.databaseURI and that should equal your FULL db connect url. It should look something like "mongodb://USERNAME:PASSWORD@SERVER". 
+In order to deploy this code you need to have a working mongodatabase. Once you have that you need to go to the server.js file and change the mongoose.connect parameter on line 49 to the url of your database. 
+Or if you're using heroku just set an environment config variable aclled databaseURL.
