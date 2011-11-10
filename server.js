@@ -122,7 +122,7 @@ app.post("/m", function(req, res){
     });
 });
 
-app.get("/m/:email.html", function(req, res){
+app.get("/m/:email.html", function(req, res){ //uses .html to fix hopkins firewall issue
     User.find({email: req.params.email}, {password: 1}, function(err, user) {
         if (!user){
           console.log("no user");
@@ -239,33 +239,59 @@ app.get(/^\/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})\.html/, function(req
   var email = req.params[0]
   console.log(req.params);
   getUser(email, function(err, user){
-    console.log("got user");
     if (user.length == 0){
       res.writeHead(404, {"Content-Type": "text/plain"});
       res.end("We need a 404 page");
       return;
     }
-    console.log("user exists");
+
+    var rankData = null, file = null;
+
+    RankShift.find({user: email}, {timestamp: 1, newRanking: 1}, function(err, rankShifts){
+      var newRankData = [];
+      // preping data for highcharts. We shouldn't have to do this
+      for (var i = 0; i < rankShifts.length; i++){
+        newRankData[i] = [rankShifts[i].timestamp, rankShifts[i].newRanking + 1];
+      }
+      rankShifts = newRankData;
+
+      if (!file){
+        rankData = JSON.stringify(rankShifts);
+      }else{
+        rankData = JSON.stringify(rankShifts);
+        var page = templateUserPage(user.wins, user.losses, user.firstName, user.lastName, user.email, rankData, file);
+        res.writeHead(200);
+        res.end(page, "binary");
+      }
+    });
 
     var user = user[0];
-    fs.readFile(path.join(process.cwd(), "www/user_page.html.tmpl"), "binary", function(err, file){
-      console.log("read the file");
-      console.log(err);
-      var ratio = Math.round((user.wins) / (user.wins + user.losses) * 100);
-
-      var file = Templ8.gsub(file, {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        ratio: (ratio) ? ratio : "0" 
-      }, /\^\{([^\}]+)\}/g);
-
-      res.writeHead(200);
-      res.end(file, "binary");
-
+    fs.readFile(path.join(process.cwd(), "www/user_page.html.tmpl"), "binary", function(err, thisFile){
+      console.log("got file");
+      if (rankData){
+        var page = templateUserPage(user.wins, user.losses, user.firstName, user.lastName, user.email, rankData, thisFile);
+        res.writeHead(200);
+        res.end(page, "binary");
+      }else{
+        file = thisFile;
+      }
     });
   });
 });
+
+function templateUserPage(wins, losses, firstName, lastName, email, rankData, file){
+  var ratio = Math.round((wins) / (wins + losses) * 100);
+
+  var file = Templ8.gsub(file, {
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    ratio: (ratio) ? ratio : "0",
+    rankData: rankData
+  }, /\^\{([^\}]+)\}/g);
+
+  return file;
+}
 
 function getUser(email, callback){
   User.find({email: email}, {email: 1, firstName: 1, lastName: 1, rating: 1, wins: 1, losses: 1}, callback);
