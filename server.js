@@ -385,7 +385,10 @@ function updateRankings(){
     for (var i = 0; i < users.length; i++){
       console.log(users[i].rank);
       if (users[i].rank != i){
-        console.log("new ranking");
+
+        if (users[i].rank == null)
+          users[i].rank = i;
+
         // the ranking changed so enter that query
         rankShift = new RankShift({
           user: users[i].email,
