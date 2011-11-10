@@ -1,37 +1,3 @@
-var K = 32; //K-value in Elo formula
-
-// Elo update function based on Wikipedia
-function updateRatings(winnerRating, loserRating) {
-  var e = 1 / (1 + Math.pow(10, (winnerRating - loserRating) / 400)); //expected value of the loser, winner is 1 - e
-  
-  // Assuming A is the winner and B is the loser (from Wikipedia):
-  // Ra' = Ra + K * (Sa - Ea) = Ra + K * (1 - Ea) = Ra + K * e
-  // Rb' = Rb + K * (Sb - Eb) = Ra - K * Eb = Ra - K * e
-  winnerRating += K * e;
-  loserRating -= K * e;
-  
-  var ratings = [winnerRating, loserRating];
-  
-  /*
-  //Update rankings
-  winnerPos = rankings.indexOf(winner);
-  while(winnerPos > 0 && ratings[rankings[winnerPos - 1]] < ratings[winner]) {
-    rankings[winnerPos] = rankings[winnerPos - 1];
-    rankings[winnerPos - 1] = winner;
-    winnerPos--;
-  }
-  
-  loserPos = rankings.indexOf(loser);
-  while(loserPos < rankings.length - 1 && ratings[rankings[loserPos + 1]] > ratings[loser]) {
-    rankings[loserPos] = rankings[loserPos + 1];
-    rankings[loserPos + 1] = loser;
-    loserPos++;
-  } */
-  
-  return ratings;
-}
-
-
 var http = require('http'),
 util = require('util'),
 url = require('url'),
@@ -57,8 +23,9 @@ var User = new Schema({
   rating    : {type: Number, default: 1000, index: -1},
   wins : {type: Number, default: 0},
   losses : {type: Number, default: 0},
-  user_id   : ObjectId
-}); //need better email validation
+  user_id   : ObjectId,
+  rank: {type: Number, index: 1}
+});
 var Match = new Schema({
     winner: String,
     loser: String,
@@ -66,11 +33,17 @@ var Match = new Schema({
     new_loser_rating: Number,
     date: {type: Date, default: Date.now}
 });
+var RankShift = new Schema({
+  user: String,
+  timestamp: Number,
+  oldRanking: Number,
+  newRanking: Number
+});
 User = mongoose.model("User", User);
 Match = mongoose.model("Match", Match);
+RankShift = mongoose.model("RankShift", RankShift);
 
 app.post("/m", function(req, res){
-    console.log("adding match between " + req.body.winner + " and " + req.body.loser);
     if (req.body.winner == req.body.loser){
       res.writeHead(400, {"Content-Type": "application/json"});
       res.end(JSON.stringify({
@@ -79,9 +52,8 @@ app.post("/m", function(req, res){
       }));
       return;
     }
-    User.find({email: req.body.winner}, {$returnKey: true}, function(err, winner){
+    User.find({email: req.body.winner}, function(err, winner){
         console.log(winner);
-        console.log(err, third);
         if (winner.length == 0){
           res.writeHead(401, {"Content-Type": "application/json"});
           res.end(JSON.stringify({
@@ -128,8 +100,20 @@ app.post("/m", function(req, res){
                 new_winner_rating: winner.rating,
                 new_loser_rating: loser.rating
             });
-            winner.save();
-            loser.save();
+            var done = false;
+
+            winner.save(function(){
+              if (done)
+                updateRankings();
+              else
+                done = true;
+            });
+            loser.save(function(){
+              if (done)
+                updateRankings();
+              else
+                done = true;
+            });
             match.save();
             
             res.writeHead(200, {"Content-Type": "application/json"});
@@ -230,6 +214,7 @@ app.post("/u/:email", function(req, res){
     }else{
       res.writeHead(200, {"Content-Type": "application/json"});
       res.end(JSON.stringify({error: 0, msg: "Successfully created user"}));
+      updateRankings();
     }
   });
 });
@@ -328,11 +313,51 @@ function authenticateReq(password, email, uri, hash){
   return authHash == hash;
 }
 
+// Elo update function based on Wikipedia
+function updateRatings(winnerRating, loserRating) {
+  var K = 32; //K-value in Elo formula
+  var e = 1 / (1 + Math.pow(10, (winnerRating - loserRating) / 400)); //expected value of the loser, winner is 1 - e
+  
+  // Assuming A is the winner and B is the loser (from Wikipedia):
+  // Ra' = Ra + K * (Sa - Ea) = Ra + K * (1 - Ea) = Ra + K * e
+  // Rb' = Rb + K * (Sb - Eb) = Ra - K * Eb = Ra - K * e
+  winnerRating += K * e;
+  loserRating -= K * e;
+  
+  var ratings = [winnerRating, loserRating];
+  
+  return ratings;
+}
+
+function updateRankings(){
+  console.log("called");
+  var rankShift;
+
+  var query = User.find();
+  query.sort("rating", -1);
+  query.exec(function(err, users){
+    console.log(users.length);
+    for (var i = 0; i < users.length; i++){
+      console.log(users[i].rank);
+      if (users[i].rank != i){
+        console.log("new ranking");
+        // the ranking changed so enter that query
+        rankShift = new RankShift({
+          user: users[i].email,
+          timestamp: new Date().getTime(),
+          oldRanking: users[i].rank,
+          newRanking: i
+        });
+        // now change the rank of the current user
+        users[i].rank = i;
+        users[i].save();
+        rankShift.save();
+      }
+    }
+  });
+}
+
 var port = process.env.PORT || 3000;
 app.listen(port, function(){
   console.log(port);
 });
-
-process.on('uncaughtException', function (err) {
-  console.log(err);
-}); 
