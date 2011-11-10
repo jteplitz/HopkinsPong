@@ -35,7 +35,7 @@ var Match = new Schema({
 });
 var RankShift = new Schema({
   user: String,
-  timestamp: Number,
+  timestamp: {type: Number, default: Date.now, index: 1},
   oldRanking: Number,
   newRanking: Number
 });
@@ -246,19 +246,39 @@ app.get(/^\/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})\.html/, function(req
     }
 
     var rankData = null, file = null;
+    var minTimestamp = new Date();
+    minTimestamp = new Date(minTimestamp.getTime() - 604800000); // set the minnimum time to two weeks ago
+    console.log(minTimestamp.getTime());
 
-    RankShift.find({user: email}, {timestamp: 1, newRanking: 1}, function(err, rankShifts){
-      var newRankData = [];
-      // preping data for highcharts. We shouldn't have to do this
+    var query = RankShift.find({user: email, timestamp: {$gt: minTimestamp.getTime()}}, {timestamp: 1, newRanking: 1, oldRanking: 1});
+    query.sort("timestamp", 1);
+    query.exec(function(err, rankShifts){
+      var newRankData = {};
+      // preping data for highcharts. We might move this to the client side 
       for (var i = 0; i < rankShifts.length; i++){
-        newRankData[i] = [rankShifts[i].timestamp, rankShifts[i].newRanking + 1];
+        var date = new Date(rankShifts[i].timestamp);
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+        newRankData[date] = [date.getTime(), rankShifts[i].newRanking + 1];
       }
-      rankShifts = newRankData;
+
+      // data is now synthesized into days so make sure that there is a value for two weeks ago.
+      var minDay = new Date(minTimestamp.getFullYear(), minTimestamp.getMonth(), minTimestamp.getDay());
+      console.log("one week ago " + newRankData[minDay]);
+      if (newRankData[minDay] == undefined){
+        console.log("undefined");
+        newRankData[minDay] = [minDay.getTime(), rankShifts[0].oldRanking + 1];
+      }
+
+      //okay now get rid of the keys
+      rankData = [];
+      for (var x in newRankData){
+        rankData[rankData.length] = newRankData[x]; 
+      }
 
       if (!file){
-        rankData = JSON.stringify(rankShifts);
+        rankData = JSON.stringify(rankData);
       }else{
-        rankData = JSON.stringify(rankShifts);
+        rankData = JSON.stringify(rankData);
         var page = templateUserPage(user.wins, user.losses, user.firstName, user.lastName, user.email, rankData, file);
         res.writeHead(200);
         res.end(page, "binary");
@@ -356,7 +376,6 @@ function updateRatings(winnerRating, loserRating) {
 }
 
 function updateRankings(){
-  console.log("called");
   var rankShift;
 
   var query = User.find();

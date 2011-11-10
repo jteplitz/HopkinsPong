@@ -28,8 +28,10 @@
               type: "datetime",
               dateTimeLabelFormats: {
                 month: "%b %e",
-                year: "%b"
-              }
+                year: "%b",
+              },
+              startOnTick: true,
+              tickInterval: 24 * 3600 * 1000
             },
             yAxis: {
               title: "Ranking",
@@ -38,7 +40,10 @@
                 value: 0,
                 width: 3,
                 color: "#808080"
-              }]
+              }],
+              startOnTick: true,
+              min: 1,
+              allowDecimals: false
             },
             legend: {
               enabled: false
