@@ -80,7 +80,7 @@ function searchBarSubmit() {
   }
 
 	for ( var i = 1; i < rows.length; i++ ) { // i is index of for loop 1
-		var fullname = rows[i].innerText.toLowerCase(); // case insensitive
+		var fullname = rows[i].innerHTML.toLowerCase(); // case insensitive
 
 		for ( var k = 0; k < v.length; k++ ) {// k is the index of for loop 2
 			var s = v[k]; // initialize search string s
