@@ -176,7 +176,6 @@ app.get("/m/:email.html", function(req, res){ //uses .html to fix hopkins firewa
     });
 });
 
-// we should probbably create a schema.js file for these or something
 app.get("/u", function(req, res){
   
   var query = User.find();
@@ -199,7 +198,6 @@ app.get("/u", function(req, res){
 });
   
 app.post("/u/:email", function(req, res){
-  console.log(req.params, req.params.password);
 
   var user = new User({
     email:      req.body.email,
