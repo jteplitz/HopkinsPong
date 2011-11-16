@@ -1,5 +1,6 @@
 /*javascript*/
 $(document).ready(function(){
+	
 
   $(".topbar .dropdown-toggle").click(function(event){
     $(".secondary-nav .dropdown").toggleClass("open");
@@ -11,6 +12,19 @@ $(document).ready(function(){
   })
 	.success(function(data) {
 		$("#cool").tmpl(data).appendTo("#table");
+		
+	var myData = [];
+	
+		for (var i = 0; i < data.length; i++){
+	
+			myData[i] = data[i].email;
+	}
+	$("#winner, #loser").autocomplete({
+		
+		source: myData
+		
+	});
+		
 	})
 	.error(function() {
     console.error("unable to retrieve ranking");
