@@ -94,7 +94,7 @@ function searchBarSubmit() {
   }
 
 	for ( var i = 1; i < rows.length; i++ ) { // i is index of for loop 1
-		var firstname = rows[i].innerHTML.toLowerCase(); // case insensitive
+		var firstname = $(rows[i]).text().trim().toLowerCase(); // case insensitive
 
 		for ( var k = 0; k < v.length; k++ ) {// k is the index of for loop 2
 			var s = v[k]; // initialize search string s
