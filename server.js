@@ -4,10 +4,18 @@ url = require('url'),
 path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
-hashlib  = require("hashlib"),
 express  = require("express"),
 Templ8   = require("Templ8"),
 config   = require("./config.js");
+
+var hashlib;
+if(config.allowsBinaryModules) {
+    hashlib = require("hashlib");
+}
+else {
+    hashlib = require("./sha.js");
+}
+
 
 var app = express.createServer(express.logger());
 app.use(express.bodyParser());
@@ -404,6 +412,6 @@ function updateRankings(){
   });
 }
 
-app.listen(port, function(){
+app.listen(config.port, function(){
   console.log(config.port);
 });

@@ -3,7 +3,8 @@ In order to deploy this code you need to have a working mongo database.
 Configuration:
 There are two different ways to configure the server. For developing, you can create a config_local.js file in the same directory as server.js. For example:
 
-exports.databaseURL = "mongodb://your.mongodb.server.here/yourdatabase" //defaults to mongodb://localhost/test
-exports.port = 3000 //The port your server runs on, defaults to 3000
+exports.databaseURL = "mongodb://your.mongodb.server.here/yourdatabase"; //defaults to mongodb://localhost/test
+exports.port; = 3000 //The port your server runs on, defaults to 3000
+exports.allowsBinaryModules = true; //defaults to true, set this to false if using cloud9
 
 For production environments, you can set environment variables corresponding to the variables in the config file above, for example you might want to set "port" to 80.
