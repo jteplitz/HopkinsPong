@@ -4,15 +4,24 @@ url = require('url'),
 path = require('path'),
 fs = require('fs'),
 mongoose = require("mongoose"),
-hashlib  = require("hashlib"),
-express  = require("express");
-Templ8   = require("Templ8");
+express  = require("express"),
+Templ8   = require("Templ8"),
+config   = require("./config.js");
+
+var hashlib;
+if(config.allowsBinaryModules) {
+    hashlib = require("hashlib");
+}
+else {
+    hashlib = require("./sha.js");
+}
+
 
 var app = express.createServer(express.logger());
 app.use(express.bodyParser());
 
 //mongoose stuff
-mongoose.connect(process.env.databaseURL || "mongodb://localhost/test");
+mongoose.connect(config.databaseURL);
 var Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
 var User = new Schema({
@@ -403,7 +412,6 @@ function updateRankings(){
   });
 }
 
-var port = process.env.PORT || 3000;
-app.listen(port, function(){
-  console.log(port);
+app.listen(config.port, function(){
+  console.log(config.port);
 });
